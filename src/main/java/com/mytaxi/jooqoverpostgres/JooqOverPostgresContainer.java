@@ -12,10 +12,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.jooq.codegen.GenerationTool;
 import org.jooq.meta.jaxb.Configuration;
 import org.jooq.meta.jaxb.Generate;
@@ -29,6 +28,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public class JooqOverPostgresContainer extends AbstractMojo
 {
 
+    public static final String TARGET_GENERATED_SOURCES_JOOQ = "target/generated-sources/jooq/";
     @ClassRule
     public static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:alpine");
 
@@ -41,9 +41,12 @@ public class JooqOverPostgresContainer extends AbstractMojo
     @Parameter(property = "jooqOverPostgresContainer.liquibaseChangeLogFile", required = true)
     private String liquibaseChangeLogFile;
 
+    @Parameter(defaultValue = "${project}", readonly = true)
+    private MavenProject project;
+
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException
+    public void execute()
     {
         postgreSQLContainer.
             withDatabaseName(schema)
@@ -53,6 +56,7 @@ public class JooqOverPostgresContainer extends AbstractMojo
         {
             liquibase(connection);
             GenerationTool.generate(getConfiguration());
+            project.addCompileSourceRoot(TARGET_GENERATED_SOURCES_JOOQ);
         }
         catch (Exception e)
         {
@@ -101,7 +105,7 @@ public class JooqOverPostgresContainer extends AbstractMojo
     {
         return new Target()
             .withPackageName(targetPackage)
-            .withDirectory(Paths.get("target/generated-sources/jooq/").toAbsolutePath().toString());
+            .withDirectory(Paths.get(TARGET_GENERATED_SOURCES_JOOQ).toAbsolutePath().toString());
     }
 
 
