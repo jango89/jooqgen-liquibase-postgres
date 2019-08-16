@@ -33,3 +33,32 @@ Sample :
 
 If generated classes fail to compile, 
 1. include ` /target/generated-sources/jooq/` folder to corresponding compiler plugin.
+2. If kotlin-maven-plugin compilation failes, add 
+    ``` 
+    <configuration>
+        <sourceDirs>
+            <source>src/main/java</source>
+            <source>target/generated-sources/jooq</source>
+        </sourceDirs>
+    </configuration>
+    ```
+ 3. If the `NoClassDefError` happens, this means the class files are missing. Add the following plugin
+```
+ <plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>build-helper-maven-plugin</artifactId>
+    <executions>
+        <execution>
+            <phase>generate-sources</phase>
+            <goals>
+                <goal>add-source</goal>
+            </goals>
+            <configuration>
+                <sources>
+                    <source>${project.build.directory}/generated-sources/jooq</source>
+                </sources>
+            </configuration>
+        </execution>
+    </executions>
+ </plugin>
+```
