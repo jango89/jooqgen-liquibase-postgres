@@ -123,7 +123,7 @@ public class JooqOverPostgresContainer extends AbstractMojo
     private void liquibase(Connection connection) throws LiquibaseException
     {
         new Liquibase(Paths.get(liquibaseChangeLogFile).toAbsolutePath().toString(), new FileSystemResourceAccessor(), getDatabase(connection))
-            .update("main");
+            .update("jooq");
     }
 
 
